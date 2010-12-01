@@ -26,30 +26,35 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_BPP = 16;
 
+
 GLfloat xrot; /* X Rotation ( NEW ) */
 GLfloat yrot; /* Y Rotation ( NEW ) */
 GLfloat zrot; /* Y Rotation ( NEW ) */
 
 
-sockaddr_in sAddr, cAddr;
+sockaddr_in sAddr;
 int sock;
 char buf[1250];
+char tbuf[1250];
+
+
 
 int sendMessage(char *msg, int msg_size)
 {
 	int res = sendto(sock, msg, msg_size, 0,(struct sockaddr *) &sAddr, sizeof(struct sockaddr_in));
+	cout<<"Sent: "<<msg<<endl;	
 	return res;
 }
 
 char* getMessage()
 {
 	socklen_t fromlen;
-	char tbuf[1250];
-	cout<<"Message: ";
+
+	//cout<<"Message: ";
 	
 	//Receive meesage, if there is one available
 	int res = recv(sock, tbuf, 1250,MSG_DONTWAIT);
-	cout<<res<<endl;
+	//cout<<res<<endl;
 	
 	//if message valid message recieved, update the map buffer	
 	if(res>-1){
@@ -63,18 +68,19 @@ char* getMessage()
 }
 
 
-int serv_init()
+int serv_init(char* server, int port)
 {
 	sock = socket(AF_INET,SOCK_DGRAM,0);
 
+	hostent * record = gethostbyname(server);
+  	if (record==NULL) { herror("gethostbyname failed"); exit(1); }
+ 	in_addr_t * addressptr = (in_addr_t *) record->h_addr;
+	cout<<server<<" "<<port<<endl;
 	sAddr.sin_family = AF_INET;
-	sAddr.sin_port = htons(9000);
-	
-	cAddr.sin_family = AF_INET;
-	cAddr.sin_port = htons(9001);
-	bind(sock,(struct sockaddr *)&cAddr,sizeof(cAddr));
-	
-	sendMessage("Hello", 6);
+	sAddr.sin_addr.s_addr = *addressptr;
+	sAddr.sin_port = htons(port);
+
+	sendMessage((char*)"Hello", 6);
 	
 	return 0;
 }
@@ -121,7 +127,7 @@ void DecryptAndSetArray(char* buffer)
 		//cout << (int)buffer[i] << endl << endl;
 		int j = i/2 % GRID_SIZE;
 		int tempi = i/2 / GRID_SIZE;
-		thegrid[tempi][j] = ((int)buffer[i]) - 128;
+		thegrid[tempi][j] = ((int)buffer[i]);
 	}
 }
 
@@ -212,7 +218,12 @@ int main(int argc, char** argv)
 {
 	xrot = (GLfloat)-45;
 	yrot = (GLfloat)0;
-	serv_init();
+
+	char *server = argv[1];
+	int port = atol(argv[2]);
+	serv_init(server, port);
+	
+
 	
 	thegrid = new int*[GRID_SIZE];
 	for(int i = 0; i < GRID_SIZE; i++)

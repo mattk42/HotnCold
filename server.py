@@ -33,6 +33,7 @@ class server():
 			#Add client to client table when message recieved			
 			data,addr = self.sock.recvfrom(buf,0)
 			self.clients.add(addr)
+			print addr
 	
 			print data
 	
