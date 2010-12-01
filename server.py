@@ -15,7 +15,7 @@ class server():
 		self.sock.bind((host,port))
 		
 		#initialize client table and map		
-		self.clients = []
+		self.clients = set([])
 		self.x=''
 
 		print "Server listening on ", port
@@ -32,15 +32,15 @@ class server():
 
 			#Add client to client table when message recieved			
 			data,addr = self.sock.recvfrom(buf,0)
-			self.clients.append(addr)
+			self.clients.add(addr)
 
 			#this is ugly, remove duplicated from client table
 			self.clients = set(self.clients)	
 			print data
 			
 			#send map to all of the cients
+			self.cx();
 			for client in self.clients:
-				self.cx();
 				self.sock.sendto(self.x,client)
 							
 j = [str(x)[0] for x in range(1250)]

@@ -44,10 +44,22 @@ int sendMessage(char *msg, int msg_size)
 char* getMessage()
 {
 	socklen_t fromlen;
-	sendto(sock, "0", 1, 0,(struct sockaddr *) &sAddr, sizeof(struct sockaddr_in));
-	int res = recv(sock, buf, 1250,0);
+	char tbuf[1250];
+	cout<<"Message: ";
+	
+	//Receive meesage, if there is one available
+	int res = recv(sock, tbuf, 1250,MSG_DONTWAIT);
 	cout<<res<<endl;
+	
+	//if message valid message recieved, update the map buffer	
+	if(res>-1){
+		for(int i=0;i<1250;i++){
+			buf[i] = tbuf[i];
+		}
+	}
+
 	return buf;
+
 }
 
 
@@ -70,6 +82,8 @@ int serv_init()
 
 void handleKeyPress( SDL_keysym *keysym )
 {
+	//send a move command to the server.
+	sendto(sock, "M", 1, 0,(struct sockaddr *) &sAddr, sizeof(struct sockaddr_in));
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
@@ -103,8 +117,8 @@ void DecryptAndSetArray(char* buffer)
 {
 	for(int i = 0; i < GRID_SIZE * GRID_SIZE * 2; i+=2)
 	{
-		cout << buffer[i] << endl;
-		cout << (int)buffer[i] << endl << endl;
+		//cout << buffer[i] << endl;
+		//cout << (int)buffer[i] << endl << endl;
 		int j = i/2 % GRID_SIZE;
 		int tempi = i/2 / GRID_SIZE;
 		thegrid[tempi][j] = ((int)buffer[i]) - 128;
@@ -220,7 +234,6 @@ int main(int argc, char** argv)
 	
 	
 	SDL_Event event;
-	bool isActive = true;//Window active? not used
 	const SDL_VideoInfo *videoInfo;//Video Info? not used.
 	
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0){cerr << "Could Not Initialize Video" << endl; exit(0);}
@@ -247,7 +260,6 @@ int main(int argc, char** argv)
 			switch(event.type)
 			{
 				case SDL_ACTIVEEVENT:
-					//isActive = (bool)event.active.gain;
 					break;
 				case SDL_VIDEORESIZE:
 					surface = SDL_SetVideoMode(event.resize.w,event.resize.h,16, videoFlags);
@@ -264,14 +276,13 @@ int main(int argc, char** argv)
 					break;
 			}
 		}
-		if (isActive)
-		{
+
 			//cout << "just before" << endl;
 			char* buffer = getMessage();
 			//cout << buffer << endl;
 			DecryptAndSetArray(buffer);
 			drawGLScene();
-		}
+
 	}
 }
 
