@@ -33,10 +33,10 @@ class server():
 			#Add client to client table when message recieved			
 			data,addr = self.sock.recvfrom(buf,0)
 			self.clients.add(addr)
-
-			#this is ugly, remove duplicated from client table
-			self.clients = set(self.clients)	
+	
 			print data
+	
+			print "We have " + str(len(self.clients)) + " clients connected"	
 			
 			#send map to all of the cients
 			self.cx();
