@@ -47,5 +47,7 @@ j = [str(x)[0] for x in range(1250)]
 x= ''
 for i in j:
 	x += i	
+
+#start the server
 serv = server()
 serv.listen()
