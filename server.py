@@ -8,11 +8,14 @@ import random
 class server():
 
 	def __init__(self):
-		#set up the port		
+		#set up the recieving socket on specified port		
 		port = int(argv[1])
 		host = "localhost"
-		self.sock = socket(AF_INET,SOCK_DGRAM)
-		self.sock.bind((host,port))
+		self.rcv_sock = socket(AF_INET,SOCK_DGRAM)
+		self.rcv_sock.bind((host,port))
+
+		#separate socket for sending data (why?)
+		self.snd_sock = socket(AF_INET,SOCK_DGRAM)
 		
 		#initialize client table and map		
 		self.clients = set([])
@@ -31,7 +34,7 @@ class server():
 			buf = 1250
 
 			#Add client to client table when message recieved			
-			data,addr = self.sock.recvfrom(buf,0)
+			data,addr = self.rcv_sock.recvfrom(buf,0)
 			self.clients.add(addr)
 			print addr
 	
@@ -42,7 +45,7 @@ class server():
 			#send map to all of the cients
 			self.cx();
 			for client in self.clients:
-				self.sock.sendto(self.x,client)
+				self.snd_sock.sendto(self.x,client)
 							
 j = [str(x)[0] for x in range(1250)]
 x= ''

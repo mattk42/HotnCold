@@ -31,8 +31,7 @@ GLfloat xrot; /* X Rotation ( NEW ) */
 GLfloat yrot; /* Y Rotation ( NEW ) */
 GLfloat zrot; /* Y Rotation ( NEW ) */
 
-
-sockaddr_in sAddr;
+struct sockaddr_in sAddr; // connector's address information
 int sock;
 char buf[1250];
 char tbuf[1250];
@@ -72,14 +71,15 @@ int serv_init(char* server, int port)
 {
 	sock = socket(AF_INET,SOCK_DGRAM,0);
 
-	hostent * record = gethostbyname(server);
-  	if (record==NULL) { herror("gethostbyname failed"); exit(1); }
- 	in_addr_t * addressptr = (in_addr_t *) record->h_addr;
-	cout<<server<<" "<<port<<endl;
-	sAddr.sin_family = AF_INET;
-	sAddr.sin_addr.s_addr = *addressptr;
-	sAddr.sin_port = htons(port);
+	//Set up the IP header for sending to the server
+	struct hostent *he = gethostbyname(server);
 
+    	sAddr.sin_family = AF_INET;     // host byte order
+   	sAddr.sin_port = htons(port); // short, network byte order
+   	sAddr.sin_addr = *((struct in_addr *)he->h_addr);
+   	memset(&(sAddr.sin_zero), '\0', 8);  // zero the rest of the struct
+
+	//send a message letting them know we are a new client
 	sendMessage((char*)"Hello", 6);
 	
 	return 0;
@@ -89,7 +89,7 @@ int serv_init(char* server, int port)
 void handleKeyPress( SDL_keysym *keysym )
 {
 	//send a move command to the server.
-	sendto(sock, "M", 1, 0,(struct sockaddr *) &sAddr, sizeof(struct sockaddr_in));
+	sendMessage("M",1);
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
