@@ -25,7 +25,7 @@ void GridArtist::DrawGrid(int ** thegrid)
 
 void GridArtist::DrawSlot(int temperature)
 {
-	cout << temperature << endl;
+	//cout << temperature << endl;
 	int wasneg = temperature;
 	if(temperature >= 0) glColor3f(1.0f * ((float)temperature) / COLOR_RATIO , 0.0, 0.0);
 	if(temperature < 0) 

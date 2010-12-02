@@ -31,10 +31,10 @@ GLfloat xrot; /* X Rotation ( NEW ) */
 GLfloat yrot; /* Y Rotation ( NEW ) */
 GLfloat zrot; /* Y Rotation ( NEW ) */
 
-struct sockaddr_in sAddr, cAddr; // connector's address information
+struct sockaddr_in sAddr, cAddr;  //connector's address information
 int sock;
-char buf[1250];
-char tbuf[1250];
+unsigned char buf[1250];
+unsigned char tbuf[1250];
 
 
 
@@ -45,7 +45,7 @@ int sendMessage(char *msg, int msg_size)
 	return res;
 }
 
-char* getMessage()
+unsigned char* getMessage()
 {
 	socklen_t fromlen;
 
@@ -94,10 +94,11 @@ int serv_init(char* server, int sport, int cport)
 }
 
 
+
 void handleKeyPress( SDL_keysym *keysym )
 {
 	//send a move command to the server.
-	sendMessage("M",1);
+	sendMessage((char *)"m",1);
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
@@ -115,10 +116,10 @@ void handleKeyPress( SDL_keysym *keysym )
 		xrot -= 15;
 		break;
 	case SDLK_RIGHT:
-		yrot += 15;
+		zrot += 15;
 		break;
 	case SDLK_LEFT:
-		yrot -= 15;
+		zrot -= 15;
 		break;
 	default:
 	    break;
@@ -127,15 +128,14 @@ void handleKeyPress( SDL_keysym *keysym )
     return;
 }
 
-void DecryptAndSetArray(char* buffer)
+void DecryptAndSetArray(unsigned char* buffer)
 {
-	for(int i = 0; i < GRID_SIZE * GRID_SIZE * 2; i+=2)
+	for(int i = 0; i < GRID_SIZE * GRID_SIZE * 2; i++)
 	{
-		//cout << buffer[i] << endl;
-		//cout << (int)buffer[i] << endl << endl;
+		//cout << buffer[i] << " : " <<(int)buffer[i] << endl;
 		int j = i/2 % GRID_SIZE;
 		int tempi = i/2 / GRID_SIZE;
-		thegrid[tempi][j] = ((int)buffer[i]);
+		thegrid[tempi][j] = ((int)(unsigned char)buffer[i])- 128;
 	}
 }
 
@@ -298,11 +298,14 @@ int main(int argc, char** argv)
 		}
 
 			//cout << "just before" << endl;
-			char* buffer = getMessage();
+			unsigned char* buffer = getMessage();
 			//cout << buffer << endl;
 			DecryptAndSetArray(buffer);
 			drawGLScene();
 
 	}
 }
+
+
+
 
