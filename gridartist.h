@@ -2,7 +2,7 @@
 #define _GRIDARTIST_
 
 #define TEMPERATURE_RATIO 40.0f
-#define COLOR_RATIO 40.0f
+#define COLOR_RATIO 120.0f
 #define GRID_SIZE 25
 #include <iostream>
 using namespace std;

@@ -8,14 +8,14 @@ GridArtist::GridArtist()
 void GridArtist::DrawGrid(int ** thegrid)
 {
 	glPushMatrix();
-	glTranslatef(((float)GRID_SIZE)/  -2.0f,	((float)GRID_SIZE)/2.0f,0.0f);
+	glTranslatef(((float)GRID_SIZE)/  -1.0f,	((float)GRID_SIZE)/1.0f,0.0f);
 	for(int i = 0; i < GRID_SIZE;i++)
 	{	
-		glTranslatef(1.0f,0.0f,0.0f);
+		glTranslatef(2.0f,0.0f,0.0f);
 		glPushMatrix();
 		for(int j = 0; j < GRID_SIZE;j++)
 		{
-			glTranslatef(0.0f,-1.0f,0.0f);
+			glTranslatef(0.0f,-2.0f,0.0f);
 			DrawSlot(thegrid[i][j]);
 		}
 		glPopMatrix();
@@ -25,12 +25,13 @@ void GridArtist::DrawGrid(int ** thegrid)
 
 void GridArtist::DrawSlot(int temperature)
 {
-	//cout << temperature << endl;
+	cout << temperature << endl;
+	int wasneg = temperature;
 	if(temperature >= 0) glColor3f(1.0f * ((float)temperature) / COLOR_RATIO , 0.0, 0.0);
 	if(temperature < 0) 
 	{
 		temperature *= -1;
-		glColor3f(0.0 , 0.0, 1.0f * ((float)temperature) / TEMPERATURE_RATIO);
+		glColor3f(0.0 , 0.0, 1.0f * ((float)temperature) / COLOR_RATIO);
 	}
    	glBegin(GL_QUADS);
 
@@ -40,11 +41,8 @@ void GridArtist::DrawSlot(int temperature)
 	glVertex3f(  1.0f,  1.0f, 0.0f );
 	glVertex3f( -1.0f,  1.0f, 0.0f );
 
-	/* Back Face */
-	glVertex3f( -1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
-	glVertex3f( -1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
-	glVertex3f(  1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
-	glVertex3f(  1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
+
+
 
 	/* Top Face */
 	glVertex3f( -1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
@@ -52,6 +50,19 @@ void GridArtist::DrawSlot(int temperature)
 	glVertex3f(  1.0f,  1.0f,  0.0f);
 	glVertex3f(  1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
 
+	/* Left Face */
+	glVertex3f( -1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
+	glVertex3f( -1.0f, -1.0f,  0.0f);
+	glVertex3f( -1.0f,  1.0f,  0.0f);
+	glVertex3f( -1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
+
+	//OTHER GUYZ
+	if(wasneg >= 0) glColor3f(1.0f * ((float)temperature-10) / COLOR_RATIO , 0.0, 0.0);
+	if(wasneg < 0) 
+	{
+		glColor3f(0.0 , 0.0, 1.0f * ((float)temperature+10) / COLOR_RATIO);
+	}
+	
 	/* Bottom Face */
 	glVertex3f( -1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
 	glVertex3f(  1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
@@ -64,10 +75,12 @@ void GridArtist::DrawSlot(int temperature)
 	glVertex3f( 1.0f,  1.0f,  0.0f);
 	glVertex3f( 1.0f, -1.0f,  0.0f);
 
-	/* Left Face */
+	/* Back Face */
 	glVertex3f( -1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
-	glVertex3f( -1.0f, -1.0f,  0.0f);
-	glVertex3f( -1.0f,  1.0f,  0.0f);
 	glVertex3f( -1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
+	glVertex3f(  1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
+	glVertex3f(  1.0f, -1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );
+
+
    	glEnd( );
 }
