@@ -31,7 +31,7 @@ GLfloat xrot; /* X Rotation ( NEW ) */
 GLfloat yrot; /* Y Rotation ( NEW ) */
 GLfloat zrot; /* Y Rotation ( NEW ) */
 
-struct sockaddr_in sAddr; // connector's address information
+struct sockaddr_in sAddr, cAddr; // connector's address information
 int sock;
 char buf[1250];
 char tbuf[1250];
@@ -41,7 +41,7 @@ char tbuf[1250];
 int sendMessage(char *msg, int msg_size)
 {
 	int res = sendto(sock, msg, msg_size, 0,(struct sockaddr *) &sAddr, sizeof(struct sockaddr_in));
-	cout<<"Sent: "<<msg<<endl;	
+	cout<<"Sent: "<<msg<<" "<<res<<endl;	
 	return res;
 }
 
@@ -60,14 +60,14 @@ char* getMessage()
 		for(int i=0;i<1250;i++){
 			buf[i] = tbuf[i];
 		}
+		cout<<"Got Message:"<<buf<<endl;
 	}
-
 	return buf;
 
 }
 
 
-int serv_init(char* server, int port)
+int serv_init(char* server, int sport, int cport)
 {
 	sock = socket(AF_INET,SOCK_DGRAM,0);
 
@@ -75,12 +75,20 @@ int serv_init(char* server, int port)
 	struct hostent *he = gethostbyname(server);
 
     	sAddr.sin_family = AF_INET;     // host byte order
-   	sAddr.sin_port = htons(port); // short, network byte order
-   	sAddr.sin_addr = *((struct in_addr *)he->h_addr);
+   	sAddr.sin_port = htons(sport); // short, network byte order
    	memset(&(sAddr.sin_zero), '\0', 8);  // zero the rest of the struct
+   	sAddr.sin_addr = *((struct in_addr *)he->h_addr);
+
+
+    	cAddr.sin_family = AF_INET;     // host byte order
+   	cAddr.sin_port = htons(cport); // short, network byte order
+   	memset(&(sAddr.sin_zero), '\0', 8);  // zero the rest of the struct
+	bind(sock,(struct sockaddr *) &cAddr, sizeof(struct sockaddr_in));
 
 	//send a message letting them know we are a new client
-	sendMessage((char*)"Hello", 6);
+	char msg[10];
+	sprintf(msg,"%d",cport);
+	sendMessage(msg, 6);
 	
 	return 0;
 }
@@ -220,8 +228,9 @@ int main(int argc, char** argv)
 	yrot = (GLfloat)0;
 
 	char *server = argv[1];
-	int port = atol(argv[2]);
-	serv_init(server, port);
+	int sport = atol(argv[2]);
+	int cport = atol(argv[3]);
+	serv_init(server, sport, cport);
 	
 
 	

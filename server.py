@@ -10,7 +10,7 @@ class server():
 	def __init__(self):
 		#set up the recieving socket on specified port		
 		port = int(argv[1])
-		host = "localhost"
+		host = ""
 		self.rcv_sock = socket(AF_INET,SOCK_DGRAM)
 		self.rcv_sock.bind((host,port))
 
@@ -35,11 +35,14 @@ class server():
 
 			#Add client to client table when message recieved			
 			data,addr = self.rcv_sock.recvfrom(buf,0)
-			self.clients.add(addr)
+			#self.clients.add(addr)
+
+
 			print addr
 	
 			print data
 	
+			self.clients.add(addr)
 			print "We have " + str(len(self.clients)) + " clients connected"	
 			
 			#send map to all of the cients
