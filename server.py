@@ -6,12 +6,14 @@ import random
 import select
 import objects
 
+GRID_SIZE = 20
+
 class user():
 	def __init__(self):
 		self.posx = 0
 		self.posy = 0
 		self.health = 100
-		self.heat = random.randint(0,255);
+		self.heat = 127
 	def setName(self,nname):
 		self.name = nname
 	def setPos(self,x,y):
@@ -52,12 +54,12 @@ class server():
 		
 		#initialize client table and map		
 		self.clients = set([])
-		self.x = [[ random.randint(0,255) for i in range(25)] for x in range(25)]#random.randint(0,255)
+		self.x = [[ random.randint(0,255) for i in range(GRID_SIZE)] for x in range(GRID_SIZE)]#random.randint(0,255)
 		for i in range(len(self.x)):
 			for j in range(len(self.x[0])):
-				self.x[i][j] = i*10 +j%16
+				self.x[i][j] = i*(255/GRID_SIZE) +j%(GRID_SIZE/2)
 		for i in range(10):
-			self.x[random.randint(0,24)][random.randint(0,24)] = random.randint(0,255)
+			self.x[random.randint(0,GRID_SIZE-1)][random.randint(0,GRID_SIZE-1)] = random.randint(0,255)
 		self.xtwo = self.x
 		print "Server listening on ", port
 	
@@ -66,14 +68,18 @@ class server():
 		self.xstr = ''
 		for j in self.x:
 			for i in j:
-				self.xstr += chr(i)
-		return self.xstr + (" " * 625)
+				if(i<=255):
+					self.xstr += chr(i)
+				else:
+					self.xstr += chr(0)
+					print "ERROR I: ",i
+		return self.xstr + (" " * GRID_SIZE**2)
 	
 	def update(self):
 		self.xstr = ''
 		
-		for i in range(25):
-			for j in range(25):
+		for i in range(GRID_SIZE):
+			for j in range(GRID_SIZE):
 				sumdiff = 0
 				numdiff = 0
 				if i != 0:
@@ -82,24 +88,24 @@ class server():
 					if j != 0:
 						numdiff += 1
 						sumdiff += self.x[i-1][j-1] - self.x[i][j]
-					if j != 24:
+					if j != GRID_SIZE-1:
 						numdiff += 1
 						sumdiff += self.x[i-1][j+1] - self.x[i][j]
 
-				if i != 24:
+				if i != GRID_SIZE-1:
 					numdiff += 1
 					sumdiff += self.x[i+1][j] - self.x[i][j]
 					if j != 0:
 						numdiff += 1
 						sumdiff += self.x[i+1][j-1] - self.x[i][j]
-					if j != 24:
+					if j != GRID_SIZE-1:
 						numdiff += 1
 						sumdiff += self.x[i+1][j+1] - self.x[i][j]
 
 				if j != 0:
 					numdiff += 1
 					sumdiff += self.x[i][j-1] - self.x[i][j]
-				if j != 24:
+				if j != GRID_SIZE-1:
 					numdiff += 1
 					sumdiff += self.x[i][j+1] - self.x[i][j]
 
@@ -109,7 +115,7 @@ class server():
 					diff = 5
 				if diff < -5:
 					diff = -5
-				self.xtwo[i][j] = int(self.x[i][j] + round(diff))
+				self.xtwo[i][j] = int(min(self.x[i][j] + round(diff),255))
 		self.x = self.xtwo
 		for user in self.users:
 			print self.users[user].name
@@ -117,13 +123,14 @@ class server():
 	
 	def listen(self):
 		while(1):
-			buf = 1250
+			buf = GRID_SIZE**2*2
 
 			#Add client to client table when message recieved
 
 			if len(self.mypoll.poll(50)) != 0:		
 				data,addr = self.rcv_sock.recvfrom(buf,0)
-				
+				print(data)	
+				# create user for all new connections.
 				if addr not in self.users:
 					print "NEW USER ", addr				
 					self.users[addr] = user()
@@ -133,16 +140,16 @@ class server():
 				#self.clients.add(addr)
 				if data[0] == 'k':
 					for i in range(1):
-						a = random.randint(0,24)
-						b = random.randint(0,24)
+						a = random.randint(0,GRID_SIZE-1)
+						b = random.randint(0,GRID_SIZE-1)
 						self.x[a][b] =255# max(random.randint(self.x[a][b],255),random.randint(200,255))
 				if data[0] == 'j':
 					for i in range(1):
-						a = random.randint(0,24)
-						b = random.randint(0,24)
+						a = random.randint(0,GRID_SIZE-1)
+						b = random.randint(0,GRID_SIZE-1)
 						self.x[a][b] =0 #min(random.randint(0,self.x[a][b]),random.randint(0,55))
 				if data[0] == 'd':
-					if self.users[addr].posx < 24:
+					if self.users[addr].posx < GRID_SIZE-1:
 						self.users[addr].move(1,0)
 				if data[0] == 'a':
 					if self.users[addr].posx > 0:
@@ -151,8 +158,16 @@ class server():
 					if self.users[addr].posy > 0:
 						self.users[addr].move(0,-1)
 				if data[0] == 's':
-					if self.users[addr].posy <24:
+					if self.users[addr].posy < GRID_SIZE-1:
 						self.users[addr].move(0,1)
+				if data[0] == 'u':
+					if self.users[addr].heat < 247:
+						self.users[addr].heat += 8
+				if data[0] == 'i':
+					if self.users[addr].heat > 8:
+						self.users[addr].heat -= 8
+				#if data[0] == 'r':
+				#	self.users[addr].ready = True
 
 				print self.users[addr].name, " : ", self.users[addr].posx, "," , self.users[addr].posy
 
@@ -169,7 +184,9 @@ class server():
 
 			self.xstr = self.asstring()
 			for client in self.clients:
+				#if self.users[client].ready:
 				self.snd_sock.sendto(self.xstr,client)
+				#self.users[client].ready = False
 				
 
 #	def listen(self):
@@ -189,7 +206,7 @@ class server():
 #			for client in self.clients:
 #				self.sock.sendto(self.xstr,client)
 							
-j = [str(x)[0] for x in range(1250)]
+j = [str(x)[0] for x in range(GRID_SIZE**2*2)]
 x= ''
 for i in j:
 	x += i	

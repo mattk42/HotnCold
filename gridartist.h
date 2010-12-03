@@ -3,7 +3,7 @@
 
 #define TEMPERATURE_RATIO 10.0f
 #define COLOR_RATIO 120.0f
-#define GRID_SIZE 25
+#define GRID_SIZE 20
 #include <iostream>
 using namespace std;
 #include <GL/glut.h>    // Header File For The GLUT Library 

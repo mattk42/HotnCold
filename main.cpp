@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <iostream>
 
+
 using namespace std;
 
 SDL_Surface *surface;
@@ -34,8 +35,8 @@ GLfloat zoom;
 
 struct sockaddr_in sAddr, cAddr;  //connector's address information
 int sock;
-unsigned char buf[1250];
-unsigned char tbuf[1250];
+unsigned char buf[GRID_SIZE*GRID_SIZE*2];
+unsigned char tbuf[GRID_SIZE*GRID_SIZE*2];
 
 
 
@@ -53,15 +54,15 @@ unsigned char* getMessage()
 	//cout<<"Message: ";
 	
 	//Receive meesage, if there is one available
-	int res = recv(sock, tbuf, 1250,MSG_DONTWAIT);
+	int res = recv(sock, tbuf, GRID_SIZE*GRID_SIZE*2,MSG_DONTWAIT);
 	//cout<<res<<endl;
 	
 	//if message valid message recieved, update the map buffer	
 	if(res>-1){
-		for(int i=0;i<1250;i++){
+		for(int i=0;i<GRID_SIZE*GRID_SIZE*2;i++){
 			buf[i] = tbuf[i];
 		}
-		//cout<<"Got Message:"<<buf<<endl;
+		cout<<"Got Message:"<<endl;
 	}
 	return buf;
 
@@ -178,7 +179,7 @@ int drawGLScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	glLoadIdentity();
-		glTranslatef(0.0f,0.0f,-30.0f + zoom);
+		glTranslatef(0.0f,0.0f,-60.0f + zoom);
 	
 	glRotatef( xrot, 1.0f, 0.0f, 0.0f); //Rotate On The X Axis
 	glRotatef( yrot, 0.0f, 1.0f, 0.0f); // Rotate On The Y Axis 
@@ -340,6 +341,7 @@ int main(int argc, char** argv)
 				unsigned char* buffer = getMessage();
 				DecryptAndSetArray(buffer);		
 				drawGLScene();
+				//sendMessage((char *)"r",1);
 				//sleep(1)
 
 	}
