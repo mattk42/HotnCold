@@ -22,14 +22,15 @@ using namespace std;
 SDL_Surface *surface;
 int** thegrid;
 GridArtist * myartist;
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
 const int SCREEN_BPP = 16;
 
 
 GLfloat xrot; /* X Rotation ( NEW ) */
 GLfloat yrot; /* Y Rotation ( NEW ) */
 GLfloat zrot; /* Y Rotation ( NEW ) */
+GLfloat zoom;
 
 struct sockaddr_in sAddr, cAddr;  //connector's address information
 int sock;
@@ -60,7 +61,7 @@ unsigned char* getMessage()
 		for(int i=0;i<1250;i++){
 			buf[i] = tbuf[i];
 		}
-		cout<<"Got Message:"<<buf<<endl;
+		//cout<<"Got Message:"<<buf<<endl;
 	}
 	return buf;
 
@@ -98,7 +99,7 @@ int serv_init(char* server, int sport, int cport)
 void handleKeyPress( SDL_keysym *keysym )
 {
 	//send a move command to the server.
-	sendMessage((char *)"m",1);
+
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
@@ -110,16 +111,46 @@ void handleKeyPress( SDL_keysym *keysym )
 	case SDLK_p:
 		break;
 	case SDLK_UP:
-		xrot += 15;
+		if (zoom <= -12) zoom += 15;
 		break;
 	case SDLK_DOWN:
-		xrot -= 15;
+		zoom -= 15;
 		break;
 	case SDLK_RIGHT:
 		zrot += 15;
 		break;
 	case SDLK_LEFT:
 		zrot -= 15;
+		break;
+	case SDLK_w:
+		sendMessage((char *)"w",1);
+		break;
+	case SDLK_a:
+		sendMessage((char *)"a",1);
+		break;
+	case SDLK_s:
+		sendMessage((char *)"s",1);
+		break;
+	case SDLK_d:
+		sendMessage((char *)"d",1);
+		break;
+	case SDLK_u:
+		sendMessage((char *)"u",1);
+		break;
+	case SDLK_i:
+		sendMessage((char *)"i",1);
+		break;
+	case SDLK_o:
+		sendMessage((char *)"o",1);
+		break;
+	case SDLK_j:
+		sendMessage((char *)"j",1);
+		break;
+	case SDLK_k:
+		sendMessage((char *)"k",1);
+		break;
+	case SDLK_l:
+		sendMessage((char *)"l",1);
 		break;
 	default:
 	    break;
@@ -130,12 +161,12 @@ void handleKeyPress( SDL_keysym *keysym )
 
 void DecryptAndSetArray(unsigned char* buffer)
 {
-	for(int i = 0; i < GRID_SIZE * GRID_SIZE * 2; i++)
+	for(int i = 0; i < GRID_SIZE * GRID_SIZE ; i++)
 	{
 		//cout << buffer[i] << " : " <<(int)buffer[i] << endl;
-		int j = i/2 % GRID_SIZE;
-		int tempi = i/2 / GRID_SIZE;
-		thegrid[tempi][j] = ((int)(unsigned char)buffer[i])- 128;
+		int j = i % GRID_SIZE;
+		int tempi = i / GRID_SIZE;
+		thegrid[tempi][j] = ((int)(unsigned char)buffer[i])- 127;
 	}
 }
 
@@ -147,7 +178,7 @@ int drawGLScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	glLoadIdentity();
-		glTranslatef(0.0f,0.0f,-30.0f);
+		glTranslatef(0.0f,0.0f,-30.0f + zoom);
 	
 	glRotatef( xrot, 1.0f, 0.0f, 0.0f); //Rotate On The X Axis
 	glRotatef( yrot, 0.0f, 1.0f, 0.0f); // Rotate On The Y Axis 
@@ -224,6 +255,11 @@ bool initGL()
 
 int main(int argc, char** argv)
 {
+	if(argc != 4)
+	{
+		cout << "bad args" << endl;
+		exit(1);
+	}
 	xrot = (GLfloat)-45;
 	yrot = (GLfloat)0;
 
@@ -298,10 +334,13 @@ int main(int argc, char** argv)
 		}
 
 			//cout << "just before" << endl;
-			unsigned char* buffer = getMessage();
+
 			//cout << buffer << endl;
-			DecryptAndSetArray(buffer);
-			drawGLScene();
+			
+				unsigned char* buffer = getMessage();
+				DecryptAndSetArray(buffer);		
+				drawGLScene();
+				//sleep(1)
 
 	}
 }
