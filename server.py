@@ -142,7 +142,7 @@ class server():
 						b = random.randint(0,24)
 						self.x[a][b] =0 #min(random.randint(0,self.x[a][b]),random.randint(0,55))
 				if data[0] == 'd':
-					if self.users[addr].posx < 54:
+					if self.users[addr].posx < 24:
 						self.users[addr].move(1,0)
 				if data[0] == 'a':
 					if self.users[addr].posx > 0:
