@@ -121,7 +121,7 @@ class server():
 
 			#Add client to client table when message recieved
 
-			if len(self.mypoll.poll(25)) != 0:		
+			if len(self.mypoll.poll(50)) != 0:		
 				data,addr = self.rcv_sock.recvfrom(buf,0)
 				
 				if addr not in self.users:
@@ -142,7 +142,7 @@ class server():
 						b = random.randint(0,24)
 						self.x[a][b] =0 #min(random.randint(0,self.x[a][b]),random.randint(0,55))
 				if data[0] == 'd':
-					if self.users[addr].posx < 24:
+					if self.users[addr].posx < 54:
 						self.users[addr].move(1,0)
 				if data[0] == 'a':
 					if self.users[addr].posx > 0:
@@ -151,7 +151,7 @@ class server():
 					if self.users[addr].posy > 0:
 						self.users[addr].move(0,-1)
 				if data[0] == 's':
-					if self.users[addr].posy < 24:
+					if self.users[addr].posy <24:
 						self.users[addr].move(0,1)
 
 				print self.users[addr].name, " : ", self.users[addr].posx, "," , self.users[addr].posy
