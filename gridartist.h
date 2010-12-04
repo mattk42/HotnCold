@@ -15,7 +15,7 @@ using namespace std;
 class GridArtist
 {
 	private:
-
+	int prevgrid[GRID_SIZE][GRID_SIZE];
 	public:
 	GridArtist();
 	void DrawGrid( int** thegrid);

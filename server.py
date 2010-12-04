@@ -133,7 +133,7 @@ class server():
 
 			if len(self.mypoll.poll(50)) != 0:		
 				data,addr = self.rcv_sock.recvfrom(buf,0)
-				print(data)	
+				#print(data)	
 				# create user for all new connections.
 				if addr not in self.users:
 					print "NEW USER ", addr				
@@ -142,62 +142,58 @@ class server():
 					self.users[addr].setPos(0,0)
 
 				#self.clients.add(addr)
-				if data[0] == 'k':
+				if data == "QUIT":
+					print "USER QUIT: ", addr
+					del self.users[addr]
+				elif data[0] == 'k':
 					for i in range(1):
 						a = random.randint(0,GRID_SIZE-1)
 						b = random.randint(0,GRID_SIZE-1)
 						self.x[a][b] =255# max(random.randint(self.x[a][b],255),random.randint(200,255))
-				if data[0] == 'j':
+				elif data[0] == '	j':
 					for i in range(1):
 						a = random.randint(0,GRID_SIZE-1)
 						b = random.randint(0,GRID_SIZE-1)
 						self.x[a][b] =0 #min(random.randint(0,self.x[a][b]),random.randint(0,55))
-				if data[0] == 'd':
+				elif data[0] == 'd':
 					if self.users[addr].posx < GRID_SIZE-1:
 						self.users[addr].move(1,0)
 						self.users[addr].dir = 'r'
-				if data[0] == 'a':
+				elif data[0] == 'a':
 					if self.users[addr].posx > 0:
 						self.users[addr].move(-1,0)
 						self.users[addr].dir = 'l'
-				if data[0] == 'w':
+				elif data[0] == 'w':
 					if self.users[addr].posy > 0:
 						self.users[addr].move(0,-1)
 						self.users[addr].dir = 'u'
-				if data[0] == 's':
+				elif data[0] == 's':
 					if self.users[addr].posy < GRID_SIZE-1:
 						self.users[addr].move(0,1)
 						self.users[addr].dir ='d'
-				if data[0] == 'u':
+				elif data[0] == 'u':
 					if self.users[addr].heat < 247:
 						self.users[addr].heat += 8
-				if data[0] == 'i':
+				elif data[0] == 'i':
 					if self.users[addr].heat > 8:
 						self.users[addr].heat -= 8
-				if data[0] == 'l':
+				elif data[0] == 'l':
 						if(self.users[addr].dir == 'u'):
 							for y in range(0,self.users[addr].posy):
 								self.x[self.users[addr].posx][y] = self.users[addr].heat
-						if(self.users[addr].dir == 'd'):
+						elif(self.users[addr].dir == 'd'):
 							print 'downshoot'
 							for y in range(self.users[addr].posy+1, GRID_SIZE):
 								self.x[self.users[addr].posx][y] = self.users[addr].heat
-						if(self.users[addr].dir == 'l'):
+						elif(self.users[addr].dir == 'l'):
 							for x in range(0,self.users[addr].posx):
 								self.x[x][self.users[addr].posy] = self.users[addr].heat
-						if(self.users[addr].dir == 'r'):
+						elif(self.users[addr].dir == 'r'):
 							for x in range(self.users[addr].posx+1, GRID_SIZE):
 								self.x[x][self.users[addr].posy] = self.users[addr].heat
 						self.users[addr].heat = self.users[addr].heat *.95
 					
-				#if data[0] == 'r':
-				#	self.users[addr].ready = True
 
-				print self.users[addr].name, " : ", self.users[addr].posx, "," , self.users[addr].posy
-
-				#print addr
-	
-				#print data
 
 			
 			#send map to all of the cients

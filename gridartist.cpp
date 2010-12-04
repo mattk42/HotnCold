@@ -2,6 +2,11 @@
 
 GridArtist::GridArtist()
 {
+	for(int x = 0; x<GRID_SIZE;x++){
+		for(int y = 0; x<GRID_SIZE;x++){
+			prevgrid[x][y] = 0;
+		}
+	}
 	return;
 }
 
@@ -15,8 +20,16 @@ void GridArtist::DrawGrid(int ** thegrid)
 		glPushMatrix();
 		for(int j = 0; j < GRID_SIZE;j++)
 		{
-			glTranslatef(0.0f,-2.0f,0.0f);
-			DrawSlot(thegrid[i][j]);
+			//Still drawing all of the cubes, but the first for loop are the ones that changed
+			if(thegrid[i][j] != prevgrid[i][j]){
+				glTranslatef(0.0f,-2.0f,0.0f);
+				DrawSlot(thegrid[i][j]);
+				prevgrid[i][j] = thegrid[i][j];
+			}
+			else{
+				glTranslatef(0.0f,-2.0f,0.0f);
+				DrawSlot(prevgrid[i][j]); 
+			}
 		}
 		glPopMatrix();
 	}
@@ -40,9 +53,6 @@ void GridArtist::DrawSlot(int temperature)
 	glVertex3f(  1.0f, -1.0f, 0.0f );
 	glVertex3f(  1.0f,  1.0f, 0.0f );
 	glVertex3f( -1.0f,  1.0f, 0.0f );
-
-
-
 
 	/* Top Face */
 	glVertex3f( -1.0f,  1.0f, 1.0f * ((float)temperature) / TEMPERATURE_RATIO );

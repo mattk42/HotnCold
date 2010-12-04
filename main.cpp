@@ -197,6 +197,7 @@ void handleKeyPress( SDL_keysym *keysym )
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
+	    sendMessage("QUIT",4);
 	    exit(0);
 	    break;
 	case SDLK_F1:
@@ -450,6 +451,7 @@ int main(int argc, char** argv)
 				//sleep(1)
 
 	}
+
 }
 
 
