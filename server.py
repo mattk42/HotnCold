@@ -39,7 +39,7 @@ class server():
 		#self.objects.append(objects.Bomb(255,10,10))
 		#self.objects.append(objects.Bomb(255,10,10))
 		#self.objects.append(objects.Bomb(0,20,20))
-		#self.objects.append(objects.Fish(0,0,0))
+		self.objects.append(objects.Fish(0,0,0))
 		#self.objects.append(objects.Fish(255,10,12))
 		port = int(argv[1])
 		host = ""
@@ -155,19 +155,19 @@ class server():
 				if data[0] == 'd':
 					if self.users[addr].posx < GRID_SIZE-1:
 						self.users[addr].move(1,0)
-						self.dir = 'r'
+						self.users[addr].dir = 'r'
 				if data[0] == 'a':
 					if self.users[addr].posx > 0:
 						self.users[addr].move(-1,0)
-						self.dir = 'l'
+						self.users[addr].dir = 'l'
 				if data[0] == 'w':
 					if self.users[addr].posy > 0:
 						self.users[addr].move(0,-1)
-						self.dir = 'u'
+						self.users[addr].dir = 'u'
 				if data[0] == 's':
 					if self.users[addr].posy < GRID_SIZE-1:
 						self.users[addr].move(0,1)
-						self.dir ='d'
+						self.users[addr].dir ='d'
 				if data[0] == 'u':
 					if self.users[addr].heat < 247:
 						self.users[addr].heat += 8
@@ -175,17 +175,17 @@ class server():
 					if self.users[addr].heat > 8:
 						self.users[addr].heat -= 8
 				if data[0] == 'l':
-						if(self.dir == 'u'):
+						if(self.users[addr].dir == 'u'):
 							for y in range(0,self.users[addr].posy):
 								self.x[self.users[addr].posx][y] = self.users[addr].heat
-						if(self.dir == 'd'):
+						if(self.users[addr].dir == 'd'):
 							print 'downshoot'
 							for y in range(self.users[addr].posy+1, GRID_SIZE):
 								self.x[self.users[addr].posx][y] = self.users[addr].heat
-						if(self.dir == 'l'):
+						if(self.users[addr].dir == 'l'):
 							for x in range(0,self.users[addr].posx):
 								self.x[x][self.users[addr].posy] = self.users[addr].heat
-						if(self.dir == 'r'):
+						if(self.users[addr].dir == 'r'):
 							for x in range(self.users[addr].posx+1, GRID_SIZE):
 								self.x[x][self.users[addr].posy] = self.users[addr].heat
 						self.users[addr].heat = self.users[addr].heat *.95

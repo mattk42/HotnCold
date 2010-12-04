@@ -4,6 +4,7 @@
 #include <GL/glut.h>    // Header File For The GLUT Library 
 #include <GL/gl.h>	// Header File For The OpenGL32 Library
 #include <GL/glu.h>	// Header File For The GLu32 Library
+#include <GL/glx.h>
 #include "SDL.h"
 #include <stdio.h>      // Header file for standard file i/o.
 #include <stdlib.h>     // Header file for malloc/free.
@@ -37,6 +38,98 @@ struct sockaddr_in sAddr, cAddr;  //connector's address information
 int sock;
 unsigned char buf[GRID_SIZE*GRID_SIZE*2];
 unsigned char tbuf[GRID_SIZE*GRID_SIZE*2];
+
+
+//copied code for font display!
+GLuint  base; /* Base Display List For The Font Set */
+/* function to recover memory form our list of characters */
+void KillFont( void )
+{
+    glDeleteLists( base, 96 );
+
+    return;
+}
+
+/* function to release/destroy our resources and restoring the old desktop */
+void Quit( int returnCode )
+{
+
+    KillFont( );
+    /* clean up the window */
+    SDL_Quit( );
+
+    /* and exit appropriately */
+    exit( returnCode );
+}
+
+/* function to build our font list */
+void buildFont( void )
+{
+    Display *dpy;          /* Our current X display */
+    XFontStruct *fontInfo; /* Our font info */
+
+    /* Sotrage for 96 characters */
+    base = glGenLists( 96 );
+
+    /* Get our current display long enough to get the fonts */
+    dpy = XOpenDisplay( NULL );
+
+    /* Get the font information */
+    fontInfo = XLoadQueryFont( dpy, "-adobe-helvetica-medium-r-normal--18-*-*-*-p-*-iso8859-1" );
+
+    /* If the above font didn't exist try one that should */
+    if ( fontInfo == NULL )
+	{
+	    fontInfo = XLoadQueryFont( dpy, "fixed" );
+	    /* If that font doesn't exist, something is wrong */
+	    if ( fontInfo == NULL )
+		{
+		    fprintf( stderr, "no X font available?\n" );
+		    Quit( 1 );
+		}
+	}
+
+    /* generate the list */
+    glXUseXFont( fontInfo->fid, 32, 96, base );
+
+    /* Recover some memory */
+    XFreeFont( dpy, fontInfo );
+
+    /* close the display now that we're done with it */
+    XCloseDisplay( dpy );
+
+    return;
+}
+
+/* Print our GL text to the screen */
+void glPrint( const char *fmt, ... )
+{
+    char text[256]; /* Holds our string */
+    va_list ap;     /* Pointer to our list of elements */
+
+    /* If there's no text, do nothing */
+    if ( fmt == NULL )
+	return;
+
+    /* Parses The String For Variables */
+    va_start( ap, fmt );
+      /* Converts Symbols To Actual Numbers */
+      vsprintf( text, fmt, ap );
+    va_end( ap );
+
+    /* Pushes the Display List Bits */
+    glPushAttrib( GL_LIST_BIT );
+
+    /* Sets base character to 32 */
+    glListBase( base - 32 );
+
+    /* Draws the text */
+    glCallLists( strlen( text ), GL_UNSIGNED_BYTE, text );
+
+    /* Pops the Display List Bits */
+    glPopAttrib( );
+}
+//end coppied code for text
 
 
 
@@ -179,11 +272,21 @@ int drawGLScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	glLoadIdentity();
-		glTranslatef(0.0f,0.0f,-60.0f + zoom);
+
+
+	glTranslatef(0.0f,0.0f,-60.0f);
 	
+	//set text color and position, then print it
+	glColor3f( 0.0f,0.0f,1.0f);
+	glRasterPos2f(-31.0f,22.0f );
+	glPrint("Your Temp: 40 | Average Temp: 128");
+
+	glTranslatef(0.0f,0.0f,zoom);
+
 	glRotatef( xrot, 1.0f, 0.0f, 0.0f); //Rotate On The X Axis
 	glRotatef( yrot, 0.0f, 1.0f, 0.0f); // Rotate On The Y Axis 
 	glRotatef( zrot, 0.0f, 0.0f, 1.0f); // Rotate On The Z Axis
+
 
     	myartist->DrawGrid(thegrid);
 
@@ -248,6 +351,8 @@ bool initGL()
 	/* Really Nice Perspective Calculations */
 	glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
 
+	//init the font
+	buildFont( );
 	return 1;
 }
 
