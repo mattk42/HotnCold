@@ -214,7 +214,7 @@ bool resizeWindow(int neww, int newh)
 	glViewport(0,0,(GLint)neww,(GLint)newh);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
+	gluPerspective( 45.0f, ratio, 0.1f, 150.0f );
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	return 1;

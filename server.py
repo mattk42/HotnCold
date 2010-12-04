@@ -1,12 +1,14 @@
 #!/usr/bin/python
 from socket import *
 from sys import *
+from time import *
 import struct
 import random
 import select
 import objects
 
-GRID_SIZE = 20
+
+GRID_SIZE = 21
 
 class user():
 	def __init__(self):
@@ -14,6 +16,8 @@ class user():
 		self.posy = 0
 		self.health = 100
 		self.heat = 127
+		self.last_packet = 0
+		self.dir = 'u'
 	def setName(self,nname):
 		self.name = nname
 	def setPos(self,x,y):
@@ -33,8 +37,10 @@ class server():
 		#	self.objects.append(objects.Fish(random.randint(00,255),random.randint(0,24),random.randint(0,24)))
 			
 		#self.objects.append(objects.Bomb(255,10,10))
-		#self.objects.append(objects.Bomb(0,10,10))
-		#self.objects.append(objects.Fish(127,0,0))
+		#self.objects.append(objects.Bomb(255,10,10))
+		#self.objects.append(objects.Bomb(0,20,20))
+		#self.objects.append(objects.Fish(0,0,0))
+		#self.objects.append(objects.Fish(255,10,12))
 		port = int(argv[1])
 		host = ""
 		self.rcv_sock = socket(AF_INET,SOCK_DGRAM)
@@ -52,8 +58,6 @@ class server():
 #					self.x[random.randint(0,24)][random.randint(0,24)] = random.randint(127,255)_DGRAM)
 #		self.sock.bind((host,port))
 		
-		#initialize client table and map		
-		self.clients = set([])
 		self.x = [[ random.randint(0,255) for i in range(GRID_SIZE)] for x in range(GRID_SIZE)]#random.randint(0,255)
 		for i in range(len(self.x)):
 			for j in range(len(self.x[0])):
@@ -118,7 +122,7 @@ class server():
 				self.xtwo[i][j] = int(min(self.x[i][j] + round(diff),255))
 		self.x = self.xtwo
 		for user in self.users:
-			print self.users[user].name
+			#print self.users[user].name
 			self.x[self.users[user].posx][self.users[user].posy]=self.users[user].heat
 	
 	def listen(self):
@@ -151,21 +155,41 @@ class server():
 				if data[0] == 'd':
 					if self.users[addr].posx < GRID_SIZE-1:
 						self.users[addr].move(1,0)
+						self.dir = 'r'
 				if data[0] == 'a':
 					if self.users[addr].posx > 0:
 						self.users[addr].move(-1,0)
+						self.dir = 'l'
 				if data[0] == 'w':
 					if self.users[addr].posy > 0:
 						self.users[addr].move(0,-1)
+						self.dir = 'u'
 				if data[0] == 's':
 					if self.users[addr].posy < GRID_SIZE-1:
 						self.users[addr].move(0,1)
+						self.dir ='d'
 				if data[0] == 'u':
 					if self.users[addr].heat < 247:
 						self.users[addr].heat += 8
 				if data[0] == 'i':
 					if self.users[addr].heat > 8:
 						self.users[addr].heat -= 8
+				if data[0] == 'l':
+						if(self.dir == 'u'):
+							for y in range(0,self.users[addr].posy):
+								self.x[self.users[addr].posx][y] = self.users[addr].heat
+						if(self.dir == 'd'):
+							print 'downshoot'
+							for y in range(self.users[addr].posy+1, GRID_SIZE):
+								self.x[self.users[addr].posx][y] = self.users[addr].heat
+						if(self.dir == 'l'):
+							for x in range(0,self.users[addr].posx):
+								self.x[x][self.users[addr].posy] = self.users[addr].heat
+						if(self.dir == 'r'):
+							for x in range(self.users[addr].posx+1, GRID_SIZE):
+								self.x[x][self.users[addr].posy] = self.users[addr].heat
+						self.users[addr].heat = self.users[addr].heat *.95
+					
 				#if data[0] == 'r':
 				#	self.users[addr].ready = True
 
@@ -174,37 +198,19 @@ class server():
 				#print addr
 	
 				#print data
-	
-				self.clients.add(addr)
-				#print "We have " + str(len(self.clients)) + " clients connected"	
+
 			
 			#send map to all of the cients
 			self.objects = [x for x in self.objects if x.Affect(self) != 0]
 			self.update();
 
 			self.xstr = self.asstring()
-			for client in self.clients:
-				#if self.users[client].ready:
-				self.snd_sock.sendto(self.xstr,client)
-				#self.users[client].ready = False
-				
+			for client in self.users:
+				if(time() > self.users[client].last_packet+.03):
+					self.snd_sock.sendto(self.xstr,client)
+					self.users[client].last_packet = time()
 
-#	def listen(self):
-#		while(1):
-#			buf = 1250
 
-#			#Add client to client table when message recieved			
-#			data,addr = self.sock.recvfrom(buf,0)
-#			self.clients.add(addr)
-#	
-#			print data
-#	
-#			print "We have " + str(len(self.clients)) + " clients connected"	
-#			
-#			#send map to all of the cients
-#			self.update();
-#			for client in self.clients:
-#				self.sock.sendto(self.xstr,client)
 							
 j = [str(x)[0] for x in range(GRID_SIZE**2*2)]
 x= ''

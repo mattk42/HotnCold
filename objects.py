@@ -21,8 +21,8 @@ class Fish:
 		self.temp = tempa
 			
 	def Affect(self,myserver):
-		self.x = min(max(0,self.x + random.randint(-1,1)),24)
-		self.y = min(max(0,self.y + random.randint(-1,1)),24)
+		self.x = min(max(0,self.x + random.randint(-1,1)),20)
+		self.y = min(max(0,self.y + random.randint(-1,1)),20)
 		if (self.temp > 127 and myserver.x[self.x][self.y] < 127):
 			self.health -= 1
 		if (self.temp < 127 and myserver.x[self.x][self.y] > 127):
@@ -50,17 +50,18 @@ class Bomb:
 		
 	def Affect(self,myserver):
 		if self.health > 0:
-			self.x = min(max(0,self.x + random.randint(-1,1)),24)
-			self.y = min(max(0,self.y + random.randint(-1,1)),24)
+			self.x = min(max(0,self.x + random.randint(-1,1)),20)
+			self.y = min(max(0,self.y + random.randint(-1,1)),20)
 			diff = abs(myserver.x[self.x][self.y] - 127)
 			myserver.x[self.x][self.y] = 127
 			if diff > 5:
 				self.health -= diff - 5
 		if self.health <= 0:
-			self.x = random.randint(0,24)
-			self.y = random.randint(0,24)
-			myserver.x[self.x][self.y] = self.temp
-			self.health -= 1000
+			for i in range(10):
+				self.x = random.randint(0,20)
+				self.y = random.randint(0,20)
+				myserver.x[self.x][self.y] = self.temp
+			self.health = 1000
 			
 		if self.health < -10000:
 				return 0
