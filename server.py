@@ -150,7 +150,7 @@ class server():
 						a = random.randint(0,GRID_SIZE-1)
 						b = random.randint(0,GRID_SIZE-1)
 						self.x[a][b] =255# max(random.randint(self.x[a][b],255),random.randint(200,255))
-				elif data[0] == '	j':
+				elif data[0] == 'j':
 					for i in range(1):
 						a = random.randint(0,GRID_SIZE-1)
 						b = random.randint(0,GRID_SIZE-1)

@@ -15,7 +15,6 @@
 #include <netdb.h>   
 #include <netinet/in.h>
 #include <string.h>
-#include <stdio.h>
 #include <iostream>
 
 
@@ -197,7 +196,7 @@ void handleKeyPress( SDL_keysym *keysym )
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
-	    sendMessage("QUIT",4);
+	    sendMessage((char *)"QUIT",4);
 	    exit(0);
 	    break;
 	case SDLK_F1:
